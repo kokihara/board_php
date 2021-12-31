@@ -1,7 +1,29 @@
 <?php
- if(!empty($_POST('btn_submit'))){
-    var_dump($_POST);
- }
+// メッセージを保存するファイルのパス設定
+define('FILENAME','./message.txt');
+
+// タイムゾーン設定
+date_default_timezone_set('Asia/Tokyo');
+
+if(!empty($_POST('btn_submit'))){
+
+    // fopen関数を使用して、指定したファイルを開く
+    // 'a'　は書き込みのモードを指定しており、末端から追記するモードである。
+    if($file_handle = fopen(FILENAME,'a')){
+
+        // 書き込み日時を開く
+        $current_date = date("Y-m-d H:i:s");
+
+        // 書き込むデータを作成
+        $data = "'".$_POST['view_name']."','".$_POST['message']."','".$current_date."'\n";
+
+        // 書き込み
+        fwrite($flie_handle,$data);
+
+        // ファイルを閉じる
+        fclose($file_handle);
+    }
+}
 ?>
 
 <!DOCTYPE html>
