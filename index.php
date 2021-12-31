@@ -5,7 +5,7 @@ define('FILENAME','./message.txt');
 // タイムゾーン設定
 date_default_timezone_set('Asia/Tokyo');
 
-if(!empty($_POST('btn_submit'))){
+if(!empty($_POST['btn_submit'])){
 
     // fopen関数を使用して、指定したファイルを開く
     // 'a'　は書き込みのモードを指定しており、末端から追記するモードである。
@@ -18,7 +18,7 @@ if(!empty($_POST('btn_submit'))){
         $data = "'".$_POST['view_name']."','".$_POST['message']."','".$current_date."'\n";
 
         // 書き込み
-        fwrite($flie_handle,$data);
+        fwrite($file_handle,$data);
 
         // ファイルを閉じる
         fclose($file_handle);
