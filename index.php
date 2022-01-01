@@ -5,6 +5,14 @@ define('FILENAME','./message.txt');
 // タイムゾーン設定
 date_default_timezone_set('Asia/Tokyo');
 
+// 変数の初期化
+$current_date = null;
+$data = null;
+$file_handle = null;
+$split_data = null;
+$message = array();
+$message_array = array();
+
 if(!empty($_POST['btn_submit'])){
 
     // fopen関数を使用して、指定したファイルを開く
@@ -23,6 +31,15 @@ if(!empty($_POST['btn_submit'])){
         // ファイルを閉じる
         fclose($file_handle);
     }
+}
+
+if ($file_handle = fopen(FILENAME,'r')) {
+        // fgets関数はファイルから1行ずつデータを取得する関数
+    while ($data = fgets($file_handle)) {
+        echo $data . "<br>";
+    }
+    // ファイルを閉じる
+    fclose($file_handle);
 }
 ?>
 
