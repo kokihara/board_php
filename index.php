@@ -36,8 +36,17 @@ if(!empty($_POST['btn_submit'])){
 if ($file_handle = fopen(FILENAME,'r')) {
         // fgets関数はファイルから1行ずつデータを取得する関数
     while ($data = fgets($file_handle)) {
-        echo $data . "<br>";
+
+        $split_data = preg_split('/\'/',$data);
+
+        $message = array(
+            'view_name' => $split_data[1],
+            'message' => $split_data[3],
+            'post_date' => $split_data[5],
+        );
+        array_unshift($message_array,$message);
     }
+
     // ファイルを閉じる
     fclose($file_handle);
 }
@@ -337,6 +346,17 @@ article.reply::before {
 <hr>
 <section>
 <!-- ここに投稿されたメッセージを表示 -->
+<?php if( !empty($message_array) ): ?>
+<?php foreach( $message_array as $value ): ?>
+<article>
+    <div class="info">
+        <h2><?php echo $value['view_name']; ?></h2>
+        <time><?php echo date('Y年m月d日 H:i', strtotime($value['post_date'])); ?></time>
+    </div>
+    <p><?php echo $value['message']; ?></p>
+</article>
+<?php endforeach; ?>
+<?php endif; ?>
 </section>
 </body>
 </html>
