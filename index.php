@@ -12,8 +12,30 @@ $file_handle = null;
 $split_data = null;
 $message = array();
 $message_array = array();
+$success_message = null;
+$error_message = array();
+$clean = array();
 
 if(!empty($_POST['btn_submit'])){
+
+    // 表示名の入力チェック
+    if (empty($_POST['view_name'])) {
+        $error_message[] = '表示名を入力してください。';
+    } else {
+        $clean['view_name'] = htmlspecialchars($_POST['view_name'],ENT_QUOTES,'UTF-8');
+        $clean['view_name'] = preg_replace('/\\r\\n|\\n|\\r/','<br>',$clean['view_name']);
+    }
+
+    	// メッセージの入力チェック
+	if( empty($_POST['message']) ) {
+		$error_message[] = 'ひと言メッセージを入力してください。';
+	} else {
+        $clean['message'] = htmlspecialchars($_POST['message'],ENT_QUOTES,'UTF-8');
+        $clean['message'] = preg_replace('/\\r\\n|\\n|\\r/','<br>',$clean['message']);
+    }
+
+    // 未入力項目があったら、書き込みをしないようにする。
+    if (empty($error_message)) {
 
     // fopen関数を使用して、指定したファイルを開く
     // 'a'　は書き込みのモードを指定しており、末端から追記するモードである。
@@ -23,14 +45,17 @@ if(!empty($_POST['btn_submit'])){
         $current_date = date("Y-m-d H:i:s");
 
         // 書き込むデータを作成
-        $data = "'".$_POST['view_name']."','".$_POST['message']."','".$current_date."'\n";
+        $data = "'".$clean['view_name']."','".$clean['message']."','".$current_date."'\n";
 
         // 書き込み
         fwrite($file_handle,$data);
 
         // ファイルを閉じる
         fclose($file_handle);
+
+        $success_message = 'メッセージを書き込みました。';
     }
+   }
 }
 
 if ($file_handle = fopen(FILENAME,'r')) {
@@ -332,6 +357,16 @@ article.reply::before {
 <body>
 <h1>ひと言掲示板</h1>
 <!-- ここにメッセージの入力フォームを設置 -->
+<?php if(!empty($success_message)): ?>
+    <p class="success_message"><?php echo $success_message; ?></p>
+<?php endif; ?>
+<?php if(!empty($error_message)):?>
+    <ul class="error_message">
+        <?php foreach($error_message as $value): ?>
+            <li>・<?php echo $value; ?></li>
+        <?php endforeach; ?>
+    </ul>
+<?php endif; ?>
 <form method="post">
     <div>
         <label for="view_name">表示名</label>
