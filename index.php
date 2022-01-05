@@ -15,6 +15,23 @@ $message_array = array();
 $success_message = null;
 $error_message = array();
 $clean = array();
+$pdo = null;
+$stmt =null;
+$res = null;
+$option =null;
+
+// データベースに接続
+try {
+      $option = array(
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+		PDO::MYSQL_ATTR_MULTI_STATEMENTS => false,
+      );
+      $pdo = new PDO('mysql:charset=UTF8;dbname=board;host=localhost', 'root', 'root',$option);
+} catch (PDOException $e) {
+    // 接続エラーの時エラー内容を取得する
+    $error_message[] = $e->getMessage();
+}
+
 
 if(!empty($_POST['btn_submit'])){
 
@@ -39,24 +56,51 @@ if(!empty($_POST['btn_submit'])){
 
     // fopen関数を使用して、指定したファイルを開く
     // 'a'　は書き込みのモードを指定しており、末端から追記するモードである。
-    if($file_handle = fopen(FILENAME,'a')){
+    // if($file_handle = fopen(FILENAME,'a')){
 
-        // 書き込み日時を開く
-        $current_date = date("Y-m-d H:i:s");
+    //     // 書き込み日時を開く
+    //     $current_date = date("Y-m-d H:i:s");
 
-        // 書き込むデータを作成
-        $data = "'".$clean['view_name']."','".$clean['message']."','".$current_date."'\n";
+    //     // 書き込むデータを作成
+    //     $data = "'".$clean['view_name']."','".$clean['message']."','".$current_date."'\n";
 
-        // 書き込み
-        fwrite($file_handle,$data);
+    //     // 書き込み
+    //     fwrite($file_handle,$data);
 
-        // ファイルを閉じる
-        fclose($file_handle);
+    //     // ファイルを閉じる
+    //     fclose($file_handle);
 
-        $success_message = 'メッセージを書き込みました。';
+    //     $success_message = 'メッセージを書き込みました。';
+
+    // }
+
+    //書き込み日時を取得
+    $current_date =  date("Y-m-d H:i:s");
+
+    //SQL作成
+    $stmt = $pdo->prepare("INSERT INTO message ( view_name, message, post_date) VALUES ( :view_name, :message :current_date)");
+
+    // 値をセットする
+    $stmt->bindParam(':view_name', $clean['view_name'],PDO::PARAM_STR);
+    $stmt->bindParam(':message', $clean['message'],PDO::PARAM_STR);
+    $stmt->bindParam(':current_date', $clean['current_date'],PDO::PARAM_STR);
+
+    // SQLクエリの実行
+	$res = $stmt->execute();
+
+    if ($res) {
+        $success_message[] = 'メッセージを書き込みました。';
+    } else {
+        $error_message[] = '書き込みに失敗しました。';
     }
+
+    // プリペアードステートメントを削除
+    $stmt = null;
    }
 }
+
+// データベースの接続を閉じる
+$pdo = null;
 
 if ($file_handle = fopen(FILENAME,'r')) {
         // fgets関数はファイルから1行ずつデータを取得する関数
