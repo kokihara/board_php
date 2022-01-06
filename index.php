@@ -20,13 +20,14 @@ $stmt =null;
 $res = null;
 $option =null;
 
+
 // データベースに接続
 try {
       $option = array(
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 		PDO::MYSQL_ATTR_MULTI_STATEMENTS => false,
       );
-      $pdo = new PDO('mysql:charset=UTF8;dbname=board;host=localhost', 'root', 'root',$option);
+      $pdo = new PDO('mysql:charset=UTF8;dbname=board;host=localhost','root','root',$option);
 } catch (PDOException $e) {
     // 接続エラーの時エラー内容を取得する
     $error_message[] = $e->getMessage();
@@ -75,21 +76,21 @@ if(!empty($_POST['btn_submit'])){
     // }
 
     //書き込み日時を取得
-    $current_date =  date("Y-m-d H:i:s");
+    $current_date = date("Y-m-d H:i:s");
 
     //SQL作成
-    $stmt = $pdo->prepare("INSERT INTO message ( view_name, message, post_date) VALUES ( :view_name, :message :current_date)");
+    $stmt = $pdo->prepare("INSERT INTO message (view_name, message, post_date) VALUES (:view_name, :message, :current_date)");
 
     // 値をセットする
-    $stmt->bindParam(':view_name', $clean['view_name'],PDO::PARAM_STR);
-    $stmt->bindParam(':message', $clean['message'],PDO::PARAM_STR);
-    $stmt->bindParam(':current_date', $clean['current_date'],PDO::PARAM_STR);
+    $stmt->bindParam(':view_name', $clean['view_name'], PDO::PARAM_STR);
+    $stmt->bindParam(':message', $clean['message'], PDO::PARAM_STR);
+    $stmt->bindParam(':current_date', $current_date, PDO::PARAM_STR);
 
     // SQLクエリの実行
 	$res = $stmt->execute();
 
     if ($res) {
-        $success_message[] = 'メッセージを書き込みました。';
+        $success_message = 'メッセージを書き込みました。';
     } else {
         $error_message[] = '書き込みに失敗しました。';
     }
@@ -101,6 +102,7 @@ if(!empty($_POST['btn_submit'])){
 
 // データベースの接続を閉じる
 $pdo = null;
+
 
 if ($file_handle = fopen(FILENAME,'r')) {
         // fgets関数はファイルから1行ずつデータを取得する関数
