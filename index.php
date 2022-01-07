@@ -36,21 +36,29 @@ try {
 
 if(!empty($_POST['btn_submit'])){
 
+    // 空白除去
+    $view_name = preg_replace( '/\A[\p{C}\p{Z}]++|[\p{C}\p{Z}]++\z/u', '', $_POST['view_name']);
+    $message = preg_replace( '/\A[\p{C}\p{Z}]++|[\p{C}\p{Z}]++\z/u', '', $_POST['message']);
+
     // 表示名の入力チェック
-    if (empty($_POST['view_name'])) {
+    if ( empty($view_name) ) {
         $error_message[] = '表示名を入力してください。';
-    } else {
-        $clean['view_name'] = htmlspecialchars($_POST['view_name'],ENT_QUOTES,'UTF-8');
-        $clean['view_name'] = preg_replace('/\\r\\n|\\n|\\r/','<br>',$clean['view_name']);
     }
+    // データベースに登録するためにサニタイズは必要なし
+    // else {
+    //     $clean['view_name'] = htmlspecialchars($_POST['view_name'],ENT_QUOTES,'UTF-8');
+    //     $clean['view_name'] = preg_replace('/\\r\\n|\\n|\\r/','<br>',$clean['view_name']);
+    // }
 
     	// メッセージの入力チェック
-	if( empty($_POST['message']) ) {
+	if( empty($message) ) {
 		$error_message[] = 'ひと言メッセージを入力してください。';
-	} else {
-        $clean['message'] = htmlspecialchars($_POST['message'],ENT_QUOTES,'UTF-8');
-        $clean['message'] = preg_replace('/\\r\\n|\\n|\\r/','<br>',$clean['message']);
-    }
+	}
+       // データベースに登録するためにサニタイズは必要なし
+    // else {
+    //     $clean['message'] = htmlspecialchars($_POST['message'],ENT_QUOTES,'UTF-8');
+    //     $clean['message'] = preg_replace('/\\r\\n|\\n|\\r/','<br>',$clean['message']);
+    // }
 
     // 未入力項目があったら、書き込みをしないようにする。
     if (empty($error_message)) {
@@ -78,16 +86,33 @@ if(!empty($_POST['btn_submit'])){
     //書き込み日時を取得
     $current_date = date("Y-m-d H:i:s");
 
+    // トランザクション開始
+    $pdo->beginTransaction();
+
+    try {
+
     //SQL作成
     $stmt = $pdo->prepare("INSERT INTO message (view_name, message, post_date) VALUES (:view_name, :message, :current_date)");
 
     // 値をセットする
-    $stmt->bindParam(':view_name', $clean['view_name'], PDO::PARAM_STR);
-    $stmt->bindParam(':message', $clean['message'], PDO::PARAM_STR);
+    $stmt->bindParam(':view_name', $view_name, PDO::PARAM_STR);
+    $stmt->bindParam(':message', $message, PDO::PARAM_STR);
     $stmt->bindParam(':current_date', $current_date, PDO::PARAM_STR);
 
     // SQLクエリの実行
-	$res = $stmt->execute();
+	$stmt->execute();
+
+    // コミット
+    $res = $pdo->commit();
+
+    }catch(Exception $e){
+
+    // エラーが発生したらロールバック
+    $pdo->rollBack();
+
+    }
+
+
 
     if ($res) {
         $success_message = 'メッセージを書き込みました。';
