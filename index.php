@@ -19,6 +19,7 @@ $stmt =null;
 $res = null;
 $option =null;
 
+session_start();
 
 // データベースに接続
 try {
@@ -42,6 +43,9 @@ if(!empty($_POST['btn_submit'])){
     // 表示名の入力チェック
     if ( empty($view_name) ) {
         $error_message[] = '表示名を入力してください。';
+    } else {
+        // セッションに表示名を保存する
+        $_SESSION['view_name'] = $view_name;
     }
     // メッセージの入力チェック
 	if( empty($message) ) {
@@ -398,7 +402,9 @@ article.reply::before {
 <form method="post">
     <div>
         <label for="view_name">表示名</label>
-        <input id="view_name" type="text" name="view_name" value="">
+        <input id="view_name" type="text" name="view_name" value="<?php if (!empty($_SESSION['view_name'])) {
+            echo htmlspecialchars($_SESSION['view_name'], ENT_QUOTES, 'UTF-8');
+        }?>">
     </div>
     <div>
         <label for="message">ひと言メッセージ</label>
