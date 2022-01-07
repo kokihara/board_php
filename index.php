@@ -1,20 +1,19 @@
 <?php
-// メッセージを保存するファイルのパス設定
-define('FILENAME','./message.txt');
+// データベースの接続情報
+define('DB_HOST','localhost');
+define('DB_USER','root');
+define('DB_PASS','root');
+define('DB_NAME','board');
 
 // タイムゾーン設定
 date_default_timezone_set('Asia/Tokyo');
 
 // 変数の初期化
 $current_date = null;
-$data = null;
-$file_handle = null;
-$split_data = null;
 $message = array();
 $message_array = array();
 $success_message = null;
 $error_message = array();
-$clean = array();
 $pdo = null;
 $stmt =null;
 $res = null;
@@ -27,7 +26,7 @@ try {
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 		PDO::MYSQL_ATTR_MULTI_STATEMENTS => false,
       );
-      $pdo = new PDO('mysql:charset=UTF8;dbname=board;host=localhost','root','root',$option);
+      $pdo = new PDO('mysql:charset=UTF8;dbname='.DB_NAME.';host='.DB_HOST ,DB_USER ,DB_PASS ,$option);
 } catch (PDOException $e) {
     // 接続エラーの時エラー内容を取得する
     $error_message[] = $e->getMessage();
@@ -44,44 +43,13 @@ if(!empty($_POST['btn_submit'])){
     if ( empty($view_name) ) {
         $error_message[] = '表示名を入力してください。';
     }
-    // データベースに登録するためにサニタイズは必要なし
-    // else {
-    //     $clean['view_name'] = htmlspecialchars($_POST['view_name'],ENT_QUOTES,'UTF-8');
-    //     $clean['view_name'] = preg_replace('/\\r\\n|\\n|\\r/','<br>',$clean['view_name']);
-    // }
-
-    	// メッセージの入力チェック
+    // メッセージの入力チェック
 	if( empty($message) ) {
 		$error_message[] = 'ひと言メッセージを入力してください。';
 	}
-       // データベースに登録するためにサニタイズは必要なし
-    // else {
-    //     $clean['message'] = htmlspecialchars($_POST['message'],ENT_QUOTES,'UTF-8');
-    //     $clean['message'] = preg_replace('/\\r\\n|\\n|\\r/','<br>',$clean['message']);
-    // }
 
     // 未入力項目があったら、書き込みをしないようにする。
     if (empty($error_message)) {
-
-    // fopen関数を使用して、指定したファイルを開く
-    // 'a'　は書き込みのモードを指定しており、末端から追記するモードである。
-    // if($file_handle = fopen(FILENAME,'a')){
-
-    //     // 書き込み日時を開く
-    //     $current_date = date("Y-m-d H:i:s");
-
-    //     // 書き込むデータを作成
-    //     $data = "'".$clean['view_name']."','".$clean['message']."','".$current_date."'\n";
-
-    //     // 書き込み
-    //     fwrite($file_handle,$data);
-
-    //     // ファイルを閉じる
-    //     fclose($file_handle);
-
-    //     $success_message = 'メッセージを書き込みました。';
-
-    // }
 
     //書き込み日時を取得
     $current_date = date("Y-m-d H:i:s");
@@ -135,25 +103,6 @@ if(!empty($_POST['btn_submit'])){
     // データベースの接続を閉じる
     $pdo = null;
 
-
-// コメントアウトで掲示板にメッセージを表示させなくする
-// if ($file_handle = fopen(FILENAME,'r')) {
-//         // fgets関数はファイルから1行ずつデータを取得する関数
-//     while ($data = fgets($file_handle)) {
-
-//         $split_data = preg_split('/\'/',$data);
-
-//         $message = array(
-//             'view_name' => $split_data[1],
-//             'message' => $split_data[3],
-//             'post_date' => $split_data[5],
-//         );
-//         array_unshift($message_array,$message);
-//     }
-
-//     // ファイルを閉じる
-//     fclose($file_handle);
-// }
 ?>
 
 <!DOCTYPE html>
@@ -464,10 +413,10 @@ article.reply::before {
 <?php foreach( $message_array as $value ): ?>
 <article>
     <div class="info">
-        <h2><?php echo $value['view_name']; ?></h2>
+        <h2><?php echo  htmlspecialchars ($value['view_name'], ENT_QUOTES, 'UTF-8'); ?></h2>
         <time><?php echo date('Y年m月d日 H:i', strtotime($value['post_date'])); ?></time>
     </div>
-    <p><?php echo nl2br($value['message']); ?></p>
+    <p><?php echo nl2br (htmlspecialchars ($value['message'], ENT_QUOTES, 'UTF-8')); ?></p>
 </article>
 <?php endforeach; ?>
 <?php endif; ?>
