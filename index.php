@@ -125,27 +125,35 @@ if(!empty($_POST['btn_submit'])){
    }
 }
 
-// データベースの接続を閉じる
-$pdo = null;
+    if (empty($error_message)) {
 
-
-if ($file_handle = fopen(FILENAME,'r')) {
-        // fgets関数はファイルから1行ずつデータを取得する関数
-    while ($data = fgets($file_handle)) {
-
-        $split_data = preg_split('/\'/',$data);
-
-        $message = array(
-            'view_name' => $split_data[1],
-            'message' => $split_data[3],
-            'post_date' => $split_data[5],
-        );
-        array_unshift($message_array,$message);
+        // メッセージのデータを取得する
+        $sql =  "SELECT view_name,message,post_date FROM message ORDER BY post_date DESC";
+        $message_array = $pdo->query($sql);
     }
 
-    // ファイルを閉じる
-    fclose($file_handle);
-}
+    // データベースの接続を閉じる
+    $pdo = null;
+
+
+// コメントアウトで掲示板にメッセージを表示させなくする
+// if ($file_handle = fopen(FILENAME,'r')) {
+//         // fgets関数はファイルから1行ずつデータを取得する関数
+//     while ($data = fgets($file_handle)) {
+
+//         $split_data = preg_split('/\'/',$data);
+
+//         $message = array(
+//             'view_name' => $split_data[1],
+//             'message' => $split_data[3],
+//             'post_date' => $split_data[5],
+//         );
+//         array_unshift($message_array,$message);
+//     }
+
+//     // ファイルを閉じる
+//     fclose($file_handle);
+// }
 ?>
 
 <!DOCTYPE html>
@@ -459,7 +467,7 @@ article.reply::before {
         <h2><?php echo $value['view_name']; ?></h2>
         <time><?php echo date('Y年m月d日 H:i', strtotime($value['post_date'])); ?></time>
     </div>
-    <p><?php echo $value['message']; ?></p>
+    <p><?php echo nl2br($value['message']); ?></p>
 </article>
 <?php endforeach; ?>
 <?php endif; ?>
