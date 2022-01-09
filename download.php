@@ -1,58 +1,68 @@
 <?php
-// 管理ページのログインパスワード
-define('PASSWORD','adminPassword');
-
 // データベースの接続情報
 define('DB_HOST','localhost');
 define('DB_USER','root');
 define('DB_PASS','root');
 define('DB_NAME','board');
 
-// タイムゾーン設定
-date_default_timezone_set('Asia/Tokyo');
-
 // 変数の初期化
-$current_date = null;
-$message = array();
-$message_array = array();
-$success_message = null;
-$error_message = array();
+$csv_data = null;
+$sql =null;
 $pdo = null;
-$stmt =null;
-$res = null;
 $option =null;
+$message_array = array();
 
 session_start();
 
-// データベースに接続
-try {
-      $option = array(
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-		PDO::MYSQL_ATTR_MULTI_STATEMENTS => false,
-      );
-      $pdo = new PDO('mysql:charset=UTF8;dbname='.DB_NAME.';host='.DB_HOST ,DB_USER ,DB_PASS ,$option);
-} catch (PDOException $e) {
-    // 接続エラーの時エラー内容を取得する
-    $error_message[] = $e->getMessage();
-}
+    if (!empty($_POST['admin_login']) && $_SESSION['admin_login'] === true) {
+        // データベースに接続する
+        try{
+            $option = array(
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
+            );
 
-if(!empty($_POST['btn_submit'])){
-    if (!empty($_POST['admin_password']) && $_POST['admin_password'] === PASSWORD) {
-        $_SESSION['admin_login'] = true;
-    } else {
-        $error_message[] = 'ログインに失敗しました。';
-    }
-}
+            $pdo = new PDO ('mysql:charset=UTF8;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+             // メッセージのデータを取得する
+            $sql = "SELECT * FROM message ORDER BY post_date ASC";
+            $message_array = $pdo->query($sql);
 
-    if (empty($error_message)) {
+            // データベースの接続を閉じる
+            $pdo = null;
+        }catch(PDOException $e){
+            // 管理者ページへリダイレクト
+            header("Location: ./admin.php");
+            exit;
+        }
+            // ここにファイルを出力処理
+            //  出力の設定
+            header("Content-Type: text/csv");
+            header("Content-Disposition: attachment; filename=メッセージデータ.csv");
+            header("Content-Transfer-Encoding: binary");
 
-        // メッセージのデータを取得する
-        $sql =  "SELECT view_name,message,post_date FROM message ORDER BY post_date DESC";
-        $message_array = $pdo->query($sql);
-    }
+            // CSVデータ作成
+            if (!empty($message_array)) {
 
-    // データベースの接続を閉じる
-    $pdo = null;
+                // 1行目のラベル作成
+                $csv_data .= '"ID","表示名","メッセージ","投稿日時"'."\n";
+
+                foreach($message_array as $value){
+                    // データを1行ずつCSVファイルに書き込む
+                    $csv_data .= '"' . $value['id'] . '","' . $value['view_name'] . '","' . $value['message'] . '","' . $value['post_date'] . "\"\n";
+                }
+            }
+
+            // ファイルを出力
+            echo $csv_data;
+
+        }
+    //     else {
+    //         // ログインページへリダイレクト
+    //         header("Location: ./admin.php");
+    //         exit;
+    //     }
+
+    // return;
 
 ?>
 
