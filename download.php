@@ -14,7 +14,7 @@ $message_array = array();
 
 session_start();
 
-    if (!empty($_POST['admin_login']) && $_SESSION['admin_login'] === true) {
+    if (!empty($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
         // データベースに接続する
         try{
             $option = array(
@@ -22,14 +22,14 @@ session_start();
                 PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
             );
 
-            $pdo = new PDO ('mysql:charset=UTF8;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+            $pdo = new PDO('mysql:charset=UTF8;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
              // メッセージのデータを取得する
             $sql = "SELECT * FROM message ORDER BY post_date ASC";
             $message_array = $pdo->query($sql);
 
             // データベースの接続を閉じる
             $pdo = null;
-        }catch(PDOException $e){
+        } catch(PDOException $e) {
             // 管理者ページへリダイレクト
             header("Location: ./admin.php");
             exit;
@@ -54,15 +54,13 @@ session_start();
 
             // ファイルを出力
             echo $csv_data;
-
+        } else {
+            // ログインページへリダイレクト
+            header("Location: ./admin.php");
+            exit;
         }
-    //     else {
-    //         // ログインページへリダイレクト
-    //         header("Location: ./admin.php");
-    //         exit;
-    //     }
 
-    // return;
+    return;
 
 ?>
 
