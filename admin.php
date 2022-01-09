@@ -350,6 +350,11 @@ article.reply::before {
 <?php if(!empty($_SESSION['admin_login']) && $_SESSION['admin_login'] === true ): ?>
 <!-- ダウンロードボタンを配置する -->
 <form method="get" action="./download.php">
+     <select name="limit">
+        <option value="">全て</option>
+        <option value="10">10件</option>
+        <option value="30">30件</option>
+    </select>
     <input type="submit" name="btn_download" value="ダウンロード">
 </form>
 
