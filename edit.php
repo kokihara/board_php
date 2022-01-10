@@ -49,9 +49,9 @@ if (!empty($_GET['message_id'])) {
     $stmt->execute();
 
     // 表示するデータを取得する
-    $_message_data = $stmt->fetch();
+    $message_data = $stmt->fetch();
     // 投稿データが表示できないときは管理ページに戻る
-    if (empty($_message_data)) {
+    if (empty($message_data)) {
         header("Location: ./admin.php");
         exit;
     }
@@ -368,19 +368,15 @@ article.reply::before {
 <form method="post">
     <div>
         <label for="view_name">表示名</label>
-        <input id="view_name" type="text" name="view_name" value="
-        <?php if(!empty($message_data['view_name'])){echo $message_data['view_name'];}?>">
+        <input id="view_name" type="text" name="view_name" value="<?php if(!empty($message_data['view_name'])){echo $message_data['view_name'];}?>">
     </div>
     <div>
         <label for="message">ひと言メッセージ</label>
-        <textarea name="message" id="message">
-            <?php if(!empty($message_data['message'])){
-        echo $message_data['message'];} ?></textarea>
+        <textarea name="message" id="message"><?php if(!empty($message_data['message'])){echo $message_data['message'];} ?></textarea>
     </div>
         <a class="btn_cancel" href="admin.php">キャンセル</a>
         <input type="submit" name="btn_submit" value="更新">
-        <input type="hidden" name="message_id" value="
-        <?php if( !empty($message_data['id']) ){ echo $message_data['id']; } ?>" >
+        <input type="hidden" name="message_id" value="<?php if( !empty($message_data['id']) ){ echo $message_data['id']; } ?>" >
 </form>
 
 </body>
