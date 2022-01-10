@@ -39,7 +39,7 @@ try {
     $error_message[] = $e->getMessage();
 }
 
-if (!empty($_GET['message_id'])) {
+if (!empty($_GET['message_id']) && empty($_POST['message_id'])) {
     //投稿を取得するコード
     // SQL作成
     $stmt = $pdo->prepare("SELECT * FROM message WHERE id = :id");
@@ -55,6 +55,26 @@ if (!empty($_GET['message_id'])) {
         header("Location: ./admin.php");
         exit;
     }
+}elseif( !empty($_POST['message_id']) ) {
+
+	// 空白除去
+	$view_name = preg_replace( '/\A[\p{C}\p{Z}]++|[\p{C}\p{Z}]++\z/u', '', $_POST['view_name']);
+	$message = preg_replace( '/\A[\p{C}\p{Z}]++|[\p{C}\p{Z}]++\z/u', '', $_POST['message']);
+
+	// 表示名の入力チェック
+	if( empty($view_name) ) {
+		$error_message[] = '表示名を入力してください。';
+	}
+
+	// メッセージの入力チェック
+	if( empty($message) ) {
+		$error_message[] = 'メッセージを入力してください。';
+	}
+
+	if( empty($error_message) ) {
+
+		// ここにデータベースに保存する処理が入る
+	}
 }
     // データベースの接続を閉じる
     $stmt =null;
