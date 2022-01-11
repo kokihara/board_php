@@ -44,7 +44,8 @@ if(!empty($_POST['btn_submit'])){
     if (!empty($_POST['admin_password']) && $_POST['admin_password'] === PASSWORD) {
         $_SESSION['admin_login'] = true;
     } else {
-        $error_message[] = 'ログインに失敗しました。';
+        // $error_message[] = 'ログインに失敗しました。';
+        header("Location: ./index.php");
     }
 }
 
