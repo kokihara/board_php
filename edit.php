@@ -9,10 +9,8 @@ define('DB_NAME','board');
 date_default_timezone_set('Asia/Tokyo');
 
 // 変数の初期化
-$current_date = null;
 $message = array();
-$message_array = array();
-$success_message = null;
+$message_data = null;
 $error_message = array();
 $pdo = null;
 $stmt =null;
@@ -74,6 +72,34 @@ if (!empty($_GET['message_id']) && empty($_POST['message_id'])) {
 	if( empty($error_message) ) {
 
 		// ここにデータベースに保存する処理が入る
+        // トランザクション開始
+        $pdo->beginTransaction();
+
+        try {
+            // SQl作成
+            $stmt = $pdo->prepare( "UPDATE message SET view_name = :view_name, message = :message WHERE id = :id");
+
+            // 値をセット
+            $stmt->bindParam(':view_name', $view_name, PDO::PARAM_STR);
+            $stmt->bindParam(':message', $message, PDO::PARAM_STR);
+            $stmt->bindValue(':id', $_POST['message_id'], PDO::PARAM_INT);
+
+            // SQLクエリの実行
+            $stmt->execute();
+
+            // コミット
+            $res = $pdo->commit();
+
+        } catch (Exception $e) {
+            //エラーが発生した場合はロールバック
+            $pdo->rollBack();
+        }
+
+        // 更新したら一覧ページに戻る
+        if ($res) {
+            header("Location: ./admin.php");
+            exit();
+        }
 	}
 }
     // データベースの接続を閉じる
@@ -388,15 +414,18 @@ article.reply::before {
 <form method="post">
     <div>
         <label for="view_name">表示名</label>
-        <input id="view_name" type="text" name="view_name" value="<?php if(!empty($message_data['view_name'])){echo $message_data['view_name'];}?>">
+        <input id="view_name" type="text" name="view_name" value="<?php if(!empty($message_data['view_name'])){echo $message_data['view_name'];}
+        elseif( !empty($view_name) ){ echo htmlspecialchars( $view_name, ENT_QUOTES, 'UTF-8'); } ?>">
     </div>
     <div>
         <label for="message">ひと言メッセージ</label>
-        <textarea name="message" id="message"><?php if(!empty($message_data['message'])){echo $message_data['message'];} ?></textarea>
+        <textarea name="message" id="message"><?php if(!empty($message_data['message'])){echo $message_data['message'];}
+        elseif( !empty($message) ){ echo htmlspecialchars( $message, ENT_QUOTES, 'UTF-8'); }?></textarea>
     </div>
         <a class="btn_cancel" href="admin.php">キャンセル</a>
         <input type="submit" name="btn_submit" value="更新">
-        <input type="hidden" name="message_id" value="<?php if( !empty($message_data['id']) ){ echo $message_data['id']; } ?>" >
+        <input type="hidden" name="message_id" value="<?php if( !empty($message_data['id']) ){ echo $message_data['id']; }
+        elseif( !empty($_POST['message_id']) ){ echo htmlspecialchars( $_POST['message_id'], ENT_QUOTES, 'UTF-8'); }?>" >
 </form>
 
 </body>
