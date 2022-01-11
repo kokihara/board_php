@@ -24,6 +24,10 @@ $option =null;
 
 session_start();
 
+if( !empty($_GET['btn_logout']) ) {
+	unset($_SESSION['admin_login']);
+}
+
 // データベースに接続
 try {
       $option = array(
@@ -241,6 +245,14 @@ button:hover {
     background-color: #2392d8;
 }
 
+input[name=btn_logout] {
+	margin-top: 40px;
+	background-color: #666;
+}
+input[name=btn_logout]:hover {
+	background-color: #777;
+}
+
 hr {
     margin: 20px 0;
     padding: 0;
@@ -378,6 +390,11 @@ article.reply::before {
 </article>
 <?php endforeach; ?>
 <?php endif; ?>
+
+<form method="get" action="">
+    <input type="submit" name="btn_logout" value="ログアウト">
+</form>
+
 <?php else: ?>
 <!-- ここにログインフォームが入る -->
 <form method="post">

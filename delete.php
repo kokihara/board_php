@@ -10,7 +10,6 @@ date_default_timezone_set('Asia/Tokyo');
 
 // 変数の初期化
 $view_name = null;
-$message = array();
 $message_data = null;
 $error_message = array();
 $pdo = null;
