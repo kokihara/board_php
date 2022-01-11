@@ -50,6 +50,11 @@ if(!empty($_POST['btn_submit'])){
     // メッセージの入力チェック
 	if( empty($message) ) {
 		$error_message[] = 'ひと言メッセージを入力してください。';
+	} else {
+		// 文字数を確認
+		if( 30 < mb_strlen($message, 'UTF-8') ) {
+			$error_message[] = 'ひと言メッセージは30文字以内で入力してください。';
+		}
 	}
 
     // 未入力項目があったら、書き込みをしないようにする。
@@ -84,16 +89,16 @@ if(!empty($_POST['btn_submit'])){
 
     }
 
-
-
     if ($res) {
-        $success_message = 'メッセージを書き込みました。';
+       $_SESSION['success_message'] = 'メッセージを書き込みました。';
     } else {
         $error_message[] = '書き込みに失敗しました。';
     }
 
     // プリペアードステートメントを削除
     $stmt = null;
+    header('Location: ./');
+		exit;
    }
 }
 
@@ -389,8 +394,9 @@ article.reply::before {
 <body>
 <h1>ひと言掲示板</h1>
 <!-- ここにメッセージの入力フォームを設置 -->
-<?php if(!empty($success_message)): ?>
-    <p class="success_message"><?php echo $success_message; ?></p>
+<?php if( empty($_POST['btn_submit']) && !empty($_SESSION['success_message'])): ?>
+    <p class="success_message"><?php echo htmlspecialchars( $_SESSION['success_message'], ENT_QUOTES, 'UTF-8'); ?></p>
+ <?php unset($_SESSION['success_message']); ?>
 <?php endif; ?>
 <?php if(!empty($error_message)):?>
     <ul class="error_message">
@@ -408,7 +414,7 @@ article.reply::before {
     </div>
     <div>
         <label for="message">ひと言メッセージ</label>
-        <textarea name="message" id="message"></textarea>
+        <textarea name="message" id="message"><?php if( !empty($message) ){ echo htmlspecialchars( $message, ENT_QUOTES, 'UTF-8'); } ?></textarea>
     </div>
         <input type="submit" name="btn_submit" value="書き込む">
 </form>
